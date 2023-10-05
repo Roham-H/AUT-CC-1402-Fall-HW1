@@ -1,0 +1,28 @@
+{
+  "name": "authenticator",
+  "version": "1.0.0",
+  "description": "An implementation for the first part of banking authentication process described in HW1",
+  "main": "server.js",
+  "scripts": {
+    "dev": "NODE_ENV=development nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roham Hayedi",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.425.0",
+    "amqplib": "^0.10.3",
+    "config": "^3.3.9",
+    "express": "^5.0.0-beta.1",
+    "express-requests-logger": "^4.0.0",
+    "http-errors": "^2.0.0",
+    "js-yaml": "^4.1.0",
+    "moment": "^2.29.4",
+    "pg": "^8.11.3",
+    "superagent": "^8.1.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
