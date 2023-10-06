@@ -1,9 +1,10 @@
 const config = require('config')
 
-const sequelize = require('./utils/db/connection')
-const { User } = require('./utils/db/models')
-const amqp = require('./utils/amqp')
 const s3 = require('./utils/s3')
+const amqp = require('./utils/amqp')
+const faceMatcher = require('./utils/face-matcher')
+
+const { User } = require('./utils/db/models')
 
 amqp.connect().then(function processMessages(){
   console.log('AMQP connection successful')
@@ -12,26 +13,62 @@ amqp.connect().then(function processMessages(){
       console.log('Consumer cancelled by server')
       return
     }
+
     const id = msg.content.toString()
     console.log('Recieved:', id)
+
     const user = await User.findOne({
       where: { id },
       order: [['createdAt', 'DESC']]
     })
 
-    if (!user) {
+    if (!user || user.registration_state !== 'processing') {
       console.log('invalid id received')
       return
     }
-    console.log(user.id + '_' + user.image1)
-    console.log(user.id + '_' + user.image2)
 
     const images = await Promise.all([
-      s3.getObject({ key: user.id + '_' + user.image1 }).then(res => res.Body.transformToByteArray()),
-      s3.getObject({ key: user.id + '_' + user.image2 }).then(res => res.Body.transformToByteArray()),
+      s3.getObject({ key: user.id + '_' + user.image1 })
+        .then(res => res.Body.transformToByteArray()),
+      s3.getObject({ key: user.id + '_' + user.image2 })
+        .then(res => res.Body.transformToByteArray()),
     ])
-    console.log(images)
 
+    let imagesFaces
+    try {
+      imagesFaces = await Promise.all([
+        faceMatcher.getFaces(images[0]),
+        faceMatcher.getFaces(images[1])
+      ])
+    } catch (e) {
+      console.log(e)
+      return
+    }
+
+    const imagesHaveFace =
+      imagesFaces
+      .every(imageFaces => imageFaces
+        ?.some(face => face.confidence > 80)
+      )
+
+    if (!imagesHaveFace) {
+      // await User.update({ registration_state: 'rejected' }, { where: { id } })
+      user.registration_state = 'rejected'
+      await user.save()
+      return amqp.channel.ack(msg)
+    }
+
+    const { score } = await faceMatcher.checkFacesSimilarity(
+      imagesFaces[0]?.[0]?.face_id,
+      imagesFaces[1]?.[0]?.face_id
+    )
+
+    if (score < 80)
+      user.registration_state = 'rejected'
+    else
+      user.registration_state = 'accepted'
+
+    await user.save()
     amqp.channel.ack(msg)
   })
 })
