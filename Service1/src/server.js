@@ -1,5 +1,4 @@
 const express = require('express')
-const superagent = require('superagent')
 const config = require('config')
 const audit = require('express-requests-logger')
 
@@ -13,7 +12,7 @@ const { SERVER_SERVICE_PORT: PORT = 3000 } = process.env
 
 const app = express()
 
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
 app.use(audit({ doubleAudit: true }))
 
 app.use(function setDefaultBody(req, res, next){
