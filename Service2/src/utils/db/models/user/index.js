@@ -39,6 +39,9 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'processing'
   },
+  registration_description: {
+    type: DataTypes.STRING,
+  },
 }, {
   indexes: [
     {

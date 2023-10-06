@@ -54,6 +54,7 @@ amqp.connect().then(function processMessages(){
     if (!imagesHaveFace) {
       // await User.update({ registration_state: 'rejected' }, { where: { id } })
       user.registration_state = 'rejected'
+      user.registration_description = 'رد به دلیل عدم وجود چهره'
       await user.save()
       return amqp.channel.ack(msg)
     }
@@ -63,10 +64,10 @@ amqp.connect().then(function processMessages(){
       imagesFaces[1]?.[0]?.face_id
     )
 
-    if (score < 80)
+    if (score < 80) {
       user.registration_state = 'rejected'
-    else
-      user.registration_state = 'accepted'
+      user.registration_description = 'رد به دلیل عدم شباهت'
+    } else user.registration_state = 'accepted'
 
     await user.save()
     amqp.channel.ack(msg)
