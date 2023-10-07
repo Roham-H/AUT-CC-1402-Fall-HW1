@@ -15,9 +15,10 @@
     "config": "^3.3.9",
     "express": "^5.0.0-beta.1",
     "express-requests-logger": "^4.0.0",
-    "http-errors": "^2.0.0",
+    "http-assert": "^1.5.0",
     "js-yaml": "^4.1.0",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "sequelize": "^6.33.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
