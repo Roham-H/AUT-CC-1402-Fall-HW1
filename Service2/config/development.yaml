@@ -1,0 +1,21 @@
+S3:
+  ENDPOINT:
+  BUCKET:
+  KEY:
+  SECRET:
+
+DB:
+  URI:
+
+AMQP:
+  URI:
+
+IMAGGA:
+  ENDPOINT:
+  KEY:
+  SECRET:
+
+MAILGUN:
+  USER:
+  KEY:
+  DOMAIN:
