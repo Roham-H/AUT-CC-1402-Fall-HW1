@@ -25,6 +25,7 @@ amqp.connect().then(function processMessages(){
 
     if (!user || user.registration_state !== 'processing') {
       console.log('invalid id received')
+      amqp.channel.ack(msg)
       return
     }
 
